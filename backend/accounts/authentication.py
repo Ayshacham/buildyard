@@ -1,20 +1,8 @@
-import requests as http_requests
+import jwt
 from django.conf import settings
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
-from dataclasses import dataclass
-
-
-@dataclass
-class SupabaseUser:
-    """Lightweight user object built from Supabase auth response."""
-
-    id: str  # UUID — matches user_id in todo_list table
-    email: str
-
-    @property
-    def is_authenticated(self):
-        return True
+from .models import User
 
 
 class SupabaseAuthentication(BaseAuthentication):
@@ -26,23 +14,34 @@ class SupabaseAuthentication(BaseAuthentication):
         token = auth_header.split(" ")[1]
 
         try:
-            response = http_requests.get(
-                f"{settings.SUPABASE_URL}/auth/v1/user",
-                headers={
-                    "Authorization": f"Bearer {token}",
-                    "apikey": settings.SUPABASE_SECRET_KEY,
-                },
-                timeout=5,
+            payload = jwt.decode(
+                token,
+                settings.SUPABASE_JWT_SECRET,
+                algorithms=["HS256"],
+                options={"verify_aud": False},
             )
-        except http_requests.RequestException:
-            raise AuthenticationFailed("Could not reach auth server")
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed("Token has expired.")
+        except jwt.InvalidTokenError:
+            raise AuthenticationFailed("Invalid token.")
 
-        if response.status_code == 401:
-            raise AuthenticationFailed("Invalid or expired token")
+        supabase_uid = payload.get("sub")
+        if not supabase_uid:
+            raise AuthenticationFailed("Token missing sub claim.")
 
-        if response.status_code != 200:
-            raise AuthenticationFailed("Auth server error")
+        user_metadata = payload.get("user_metadata", {})
 
-        data = response.json()
+        user, created = User.objects.get_or_create(
+            supabase_uid=supabase_uid,
+            defaults={
+                "username": payload.get("email", supabase_uid).split("@")[0],
+                "email": payload.get("email", ""),
+            },
+        )
 
-        return (SupabaseUser(id=data["id"], email=data.get("email", "")), token)
+        if created:
+            user.github_username = user_metadata.get("user_name", "")
+            user.avatar_url = user_metadata.get("avatar_url", "")
+            user.save(update_fields=["github_username", "avatar_url"])
+
+        return (user, token)
