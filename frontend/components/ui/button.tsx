@@ -10,6 +10,9 @@ const buttonVariants = cva(
 		variants: {
 			variant: {
 				default: 'bg-primary text-primary-foreground [a]:hover:bg-primary/80',
+				soft: 'rounded-2xl border-0 bg-gradient-to-b from-muted/95 to-muted/70 text-foreground shadow-[0_1px_0_0_rgba(255,255,255,0.85)_inset,0_6px_20px_-8px_rgba(15,23,42,0.12)] hover:from-muted hover:to-muted/85 active:translate-y-px dark:from-muted/40 dark:to-muted/25 dark:shadow-[0_1px_0_0_rgba(255,255,255,0.08)_inset] dark:hover:from-muted/50 dark:hover:to-muted/35',
+				oauth:
+					'rounded-full border-0 bg-[#24292f] text-white shadow-[0_4px_16px_-4px_rgba(36,41,47,0.45)] hover:bg-[#2d333b] hover:shadow-[0_8px_24px_-6px_rgba(36,41,47,0.5)] focus-visible:ring-white/25 active:translate-y-0 active:scale-[0.98] dark:bg-[#1c2127] dark:hover:bg-[#24292f]',
 				outline:
 					'border-border bg-background hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50',
 				secondary:
@@ -26,6 +29,7 @@ const buttonVariants = cva(
 				xs: "h-6 gap-1 rounded-[min(var(--radius-md),10px)] px-2 text-xs in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3",
 				sm: "h-7 gap-1 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] in-data-[slot=button-group]:rounded-lg has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 [&_svg:not([class*='size-'])]:size-3.5",
 				lg: 'h-9 gap-1.5 px-2.5 has-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3',
+				pill: 'h-11 min-h-11 gap-2.5 rounded-full px-8 text-[0.9375rem] tracking-tight has-data-[icon=inline-end]:pr-9 has-data-[icon=inline-start]:pl-9',
 				icon: 'size-8',
 				'icon-xs':
 					"size-6 rounded-[min(var(--radius-md),10px)] in-data-[slot=button-group]:rounded-lg [&_svg:not([class*='size-'])]:size-3",
