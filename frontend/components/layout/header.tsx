@@ -56,7 +56,7 @@ export function Header({
 
 	return (
 		<>
-			<header className="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-border/40 bg-background/60 px-4 backdrop-blur-md transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 dark:border-white/6 dark:bg-background/30">
+			<header className="flex h-14 shrink-0 rounded-t-2xl items-center justify-between gap-3 border-b border-border/40 bg-background/85 px-4 backdrop-blur-md transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 dark:border-white/6 dark:bg-background/30">
 				<div className="flex min-w-0 items-center gap-2">
 					<SidebarTrigger className="-ml-1" />
 					<Separator
@@ -86,7 +86,7 @@ export function Header({
 				<div className="flex shrink-0 items-center gap-2">
 					<Badge
 						variant="secondary"
-						className="hidden border-0 bg-emerald-500/10 font-medium text-emerald-800 shadow-none sm:inline-flex dark:bg-emerald-500/15 dark:text-emerald-200"
+						className="hidden border-0 bg-emerald-500/30 font-medium text-emerald-900 shadow-none sm:inline-flex dark:bg-emerald-500/15 dark:text-emerald-200"
 					>
 						{streakDays === null ? 'Streak' : `${streakDays}-day streak`}
 					</Badge>
@@ -94,7 +94,7 @@ export function Header({
 					<Button
 						size="lg"
 						variant="soft"
-						className="rounded-full"
+						className="rounded-full bg-primary text-white/90"
 						type="button"
 						onClick={() => setNewProjectOpen(true)}
 					>

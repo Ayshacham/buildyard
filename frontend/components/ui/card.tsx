@@ -13,7 +13,7 @@ function Card({
 			data-variant={variant}
 			className={cn(
 				variant === 'soft' && [
-					'rounded-[1.75rem] border border-white/50 bg-white/65 text-card-foreground',
+					'rounded-xl border border-white/50 bg-white/95 text-card-foreground',
 					'shadow-[0_1px_0_0_rgba(255,255,255,0.9)_inset,0_12px_40px_-12px_rgba(99,102,241,0.15),0_4px_16px_-4px_rgba(15,23,42,0.06)]',
 					'backdrop-blur-xl dark:border-white/10 dark:bg-zinc-900/45',
 					'dark:shadow-[0_1px_0_0_rgba(255,255,255,0.06)_inset,0_12px_48px_-12px_rgba(0,0,0,0.55)]',
