@@ -74,6 +74,7 @@ class TimerState(models.Model):
     is_running = models.BooleanField(default=False)
     is_paused = models.BooleanField(default=False)
     last_tick_at = models.DateTimeField(null=True, blank=True)
+    stuck_notification_sent = models.BooleanField(default=False)
 
     class Meta:
         db_table = "sessions_timer_state"

@@ -8,4 +8,8 @@ export const queryKeys = {
 		all: ['projects'] as const,
 		list: () => ['projects', 'list'] as const,
 	},
+	sessions: {
+		all: ['sessions'] as const,
+		active: () => ['sessions', 'active'] as const,
+	},
 };

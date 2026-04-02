@@ -159,6 +159,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 
+
 def _cors_allowed_origins():
     raw = os.getenv("CORS_ALLOWED_ORIGINS", "").strip()
     if not raw:

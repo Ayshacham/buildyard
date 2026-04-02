@@ -14,4 +14,8 @@ app.conf.beat_schedule = {
         "task": "github_sync.tasks.sync_all_active_projects",
         "schedule": crontab(minute="*/30"),
     },
+    "check-overrunning-focus-sessions": {
+        "task": "sessions.tasks.check_overrunning_sessions",
+        "schedule": crontab(minute="*/5"),
+    },
 }

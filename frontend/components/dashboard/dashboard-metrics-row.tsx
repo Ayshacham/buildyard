@@ -14,7 +14,7 @@ export function DashboardMetricsRow({
 	metrics,
 }: DashboardMetricsRowProps) {
 	return (
-		<div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+		<div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
 			<MetricStatCard
 				label="Sessions today"
 				value={String(metrics.sessionsToday)}

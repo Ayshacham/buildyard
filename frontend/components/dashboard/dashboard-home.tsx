@@ -20,20 +20,20 @@ export function DashboardHome({ user, streak, projects }: DashboardHomeProps) {
 	const dashboardMetrics = computeDashboardMetrics(user, streak);
 
 	return (
-		<div className="space-y-8">
+		<div className="space-y-4">
 			<DashboardHero />
 			<DashboardMetricsRow user={user} metrics={dashboardMetrics} />
-			<div className="grid gap-4 lg:grid-cols-2">
+			<div className="grid gap-2 lg:grid-cols-2">
 				<StandupCard />
-				<FocusTimerCard />
-			</div>
-			<div className="grid gap-4 lg:grid-cols-2">
-				<ProjectsCard projects={projects} />
-				<StreakCard
-					user={user}
-					streak={streak}
-					metrics={dashboardMetrics}
+				<FocusTimerCard
+					focusDurationMinutes={user.focus_duration}
+					sessionsCompletedToday={dashboardMetrics.sessionsToday}
+					projects={projects}
 				/>
+			</div>
+			<div className="grid gap-2 lg:grid-cols-2">
+				<ProjectsCard projects={projects} />
+				<StreakCard user={user} streak={streak} metrics={dashboardMetrics} />
 			</div>
 		</div>
 	);

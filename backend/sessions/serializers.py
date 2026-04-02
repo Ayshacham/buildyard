@@ -37,4 +37,5 @@ class TimerStateSerializer(serializers.ModelSerializer):
             "is_running",
             "is_paused",
             "last_tick_at",
+            "stuck_notification_sent",
         ]

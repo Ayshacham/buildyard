@@ -26,6 +26,36 @@ export type StreakResponse = {
 	current_streak: number;
 };
 
+export type FocusSessionApi = {
+	id: string;
+	project: string | null;
+	task: string | null;
+	started_at: string;
+	ended_at: string | null;
+	duration_minutes: number | null;
+	planned_duration_minutes: number;
+	completed: boolean;
+	xp_earned: number;
+};
+
+export type TimerStateApi = {
+	id: string;
+	session: FocusSessionApi | null;
+	task: string | null;
+	project: string | null;
+	elapsed_seconds: number;
+	planned_seconds: number;
+	is_running: boolean;
+	is_paused: boolean;
+	last_tick_at: string | null;
+	stuck_notification_sent?: boolean;
+};
+
+export type ActiveSessionResponse = {
+	timer: TimerStateApi | null;
+	session: FocusSessionApi | null;
+};
+
 export type ProjectListItem = {
 	id: string;
 	name: string;

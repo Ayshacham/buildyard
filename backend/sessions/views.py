@@ -11,6 +11,10 @@ from .models import FocusSession, TimerState
 from .serializers import FocusSessionSerializer, TimerStateSerializer
 
 
+def _clamp_elapsed(value: int, planned_seconds: int) -> int:
+    return max(0, min(value, planned_seconds * 3))
+
+
 class SessionStartView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -70,20 +74,46 @@ class SessionEndView(APIView):
             )
 
         session = timer.session
+        body_elapsed = request.data.get("elapsed_seconds")
+        if body_elapsed is not None:
+            elapsed_seconds = int(body_elapsed)
+            elapsed_seconds = max(0, elapsed_seconds)
+        else:
+            elapsed_seconds = timer.elapsed_seconds
+            if timer.is_running and not timer.is_paused and timer.last_tick_at:
+                now = timezone.now()
+                delta = int((now - timer.last_tick_at).total_seconds())
+                if delta > 0:
+                    elapsed_seconds = min(
+                        timer.planned_seconds * 3,
+                        timer.elapsed_seconds + delta,
+                    )
+
+        duration_minutes = elapsed_seconds // 60
         session.completed = True
         session.ended_at = timezone.now()
-        if session.started_at and session.ended_at:
-            delta = session.ended_at - session.started_at
-            session.duration_minutes = int(delta.total_seconds() / 60)
-        session.xp_earned = (session.duration_minutes or 0) * 2
+        session.duration_minutes = duration_minutes
+        session.xp_earned = duration_minutes * 2
         session.save()
 
         if session.project:
-            session.project.total_focus_minutes += session.duration_minutes or 0
+            session.project.total_focus_minutes += duration_minutes
             session.project.last_session_at = session.ended_at
             session.project.save(update_fields=["total_focus_minutes", "last_session_at"])
 
+        project_id_for_task = session.project_id
+
         timer.delete()
+
+        session.refresh_from_db()
+
+        if project_id_for_task:
+            from config.celery import app as celery_app
+
+            celery_app.send_task(
+                "ai_assistant.tasks.summarise_context_task",
+                args=[str(project_id_for_task)],
+            )
 
         return Response(FocusSessionSerializer(session).data)
 
@@ -93,8 +123,20 @@ class SessionPauseView(APIView):
 
     def post(self, request):
         timer = get_object_or_404(TimerState, user=request.user)
+        body_elapsed = request.data.get("elapsed_seconds")
+        if body_elapsed is not None:
+            elapsed = int(body_elapsed)
+            timer.elapsed_seconds = _clamp_elapsed(elapsed, timer.planned_seconds)
+        elif timer.is_running and not timer.is_paused and timer.last_tick_at:
+            now = timezone.now()
+            delta = int((now - timer.last_tick_at).total_seconds())
+            if delta > 0:
+                timer.elapsed_seconds = min(
+                    timer.planned_seconds * 3,
+                    timer.elapsed_seconds + delta,
+                )
         timer.is_paused = True
-        timer.save(update_fields=["is_paused"])
+        timer.save(update_fields=["elapsed_seconds", "is_paused"])
         return Response(TimerStateSerializer(timer).data)
 
 
@@ -124,6 +166,25 @@ class ActiveSessionView(APIView):
                 "session": FocusSessionSerializer(timer.session).data if timer.session else None,
             }
         )
+
+    def post(self, request):
+        timer = TimerState.objects.filter(user=request.user).first()
+        if not timer:
+            return Response(
+                {"detail": "No active timer"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        elapsed_raw = request.data.get("elapsed_seconds")
+        if elapsed_raw is None:
+            return Response(
+                {"detail": "elapsed_seconds required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        elapsed = int(elapsed_raw)
+        timer.elapsed_seconds = _clamp_elapsed(elapsed, timer.planned_seconds)
+        timer.last_tick_at = timezone.now()
+        timer.save(update_fields=["elapsed_seconds", "last_tick_at"])
+        return Response(TimerStateSerializer(timer).data)
 
 
 class SessionHistoryView(generics.ListAPIView):
