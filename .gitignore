@@ -20,6 +20,7 @@ db.sqlite3
 media/
 staticfiles/
 
+.temp/
 # Next.js
 .next/
 out/
