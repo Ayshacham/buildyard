@@ -17,7 +17,9 @@ type Tool = {
 export function NavTools({ tools }: { tools: readonly Tool[] }) {
 	return (
 		<SidebarGroup className="group-data-[collapsible=icon]:hidden">
-			<SidebarGroupLabel>Projects</SidebarGroupLabel>
+			<SidebarGroupLabel className="text-[11px] font-medium uppercase tracking-wider text-sidebar-foreground/50">
+				Quick tools
+			</SidebarGroupLabel>
 			<SidebarMenu>
 				{tools.map((tool) => {
 					const Icon = tool.icon;

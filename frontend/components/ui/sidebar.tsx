@@ -130,7 +130,7 @@ function SidebarProvider({
 					} as React.CSSProperties
 				}
 				className={cn(
-					'group/sidebar-wrapper flex min-h-svh w-full has-data-[variant=inset]:bg-sidebar',
+					'group/sidebar-wrapper flex min-h-svh w-full bg-transparent',
 					className,
 				)}
 				{...props}
@@ -232,7 +232,7 @@ function Sidebar({
 				<div
 					data-sidebar="sidebar"
 					data-slot="sidebar-inner"
-					className="flex size-full flex-col bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:shadow-sm group-data-[variant=floating]:ring-1 group-data-[variant=floating]:ring-sidebar-border"
+					className="flex size-full flex-col bg-sidebar group-data-[variant=floating]:rounded-2xl group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border/60 group-data-[variant=floating]:shadow-[0_8px_32px_-12px_rgba(99,102,241,0.12),0_2px_8px_-4px_rgba(15,23,42,0.06)] group-data-[variant=floating]:ring-0 dark:group-data-[variant=floating]:border-white/10 dark:group-data-[variant=floating]:shadow-[0_12px_40px_-16px_rgba(0,0,0,0.45)]"
 				>
 					{children}
 				</div>
@@ -297,7 +297,9 @@ function SidebarInset({ className, ...props }: React.ComponentProps<'main'>) {
 		<main
 			data-slot="sidebar-inset"
 			className={cn(
-				'relative flex w-full flex-1 flex-col bg-background md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow-sm md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2',
+				'relative flex w-full flex-1 flex-col bg-transparent',
+				'md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-2xl md:peer-data-[variant=inset]:border md:peer-data-[variant=inset]:border-border/30 md:peer-data-[variant=inset]:bg-background md:peer-data-[variant=inset]:shadow-[0_1px_0_0_rgba(255,255,255,0.6)_inset,0_12px_48px_-16px_rgba(99,102,241,0.1)] md:peer-data-[variant=inset]:backdrop-blur-md md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2 dark:md:peer-data-[variant=inset]:border-white/10 dark:md:peer-data-[variant=inset]:bg-background/40',
+				'md:peer-data-[variant=floating]:m-2 md:peer-data-[variant=floating]:ml-0 md:peer-data-[variant=floating]:rounded-2xl md:peer-data-[variant=floating]:border md:peer-data-[variant=floating]:border-border/30 md:peer-data-[variant=floating]:bg-background md:peer-data-[variant=floating]:shadow-[0_1px_0_0_rgba(255,255,255,0.6)_inset,0_12px_48px_-16px_rgba(99,102,241,0.1)] md:peer-data-[variant=floating]:backdrop-blur-md md:peer-data-[variant=floating]:peer-data-[state=collapsed]:ml-2 dark:md:peer-data-[variant=floating]:border-white/10 dark:md:peer-data-[variant=floating]:bg-background/40',
 				className,
 			)}
 			{...props}
@@ -457,7 +459,7 @@ function SidebarMenuItem({ className, ...props }: React.ComponentProps<'li'>) {
 }
 
 const sidebarMenuButtonVariants = cva(
-	'peer/menu-button group/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-open:hover:bg-sidebar-accent data-open:hover:text-sidebar-accent-foreground data-active:bg-sidebar-accent data-active:font-medium data-active:text-sidebar-accent-foreground [&_svg]:size-4 [&_svg]:shrink-0 [&>span:last-child]:truncate',
+	'peer/menu-button group/menu-button flex w-full items-center gap-2 overflow-hidden rounded-xl p-2 text-left text-sm ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! hover:bg-sidebar-accent/90 hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-open:hover:bg-sidebar-accent data-open:hover:text-sidebar-accent-foreground data-active:bg-sidebar-accent data-active:font-medium data-active:text-sidebar-accent-foreground [&_svg]:size-4 [&_svg]:shrink-0 [&>span:last-child]:truncate',
 	{
 		variants: {
 			variant: {
@@ -502,7 +504,7 @@ function SidebarMenuButton({
 			data-active={isActive}
 			className={cn(
 				sidebarMenuButtonVariants({ variant, size }),
-				'hover:bg-[#0000001f]',
+				'hover:bg-[#c2a8fe1f]',
 				className,
 			)}
 			{...props}
