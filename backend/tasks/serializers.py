@@ -13,6 +13,7 @@ class TaskSerializer(serializers.ModelSerializer):
             "is_micro_task",
             "estimated_minutes",
             "status",
+            "priority",
             "completed_at",
             "created_at",
         ]

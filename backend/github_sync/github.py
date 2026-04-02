@@ -2,12 +2,13 @@ import requests
 
 
 class GithubClient:
-    def __init__(self, github_token):
+    def __init__(self, github_token=None):
         self.token = github_token
         self.headers = {
-            "Authorization": f"Bearer {github_token}",
             "Accept": "application/vnd.github.v3+json",
         }
+        if github_token:
+            self.headers["Authorization"] = f"Bearer {github_token}"
 
     def get_repo(self, repo):
         url = f"https://api.github.com/repos/{repo}"
@@ -26,7 +27,17 @@ class GithubClient:
 
     def get_pull_requests(self, repo, state="open"):
         url = f"https://api.github.com/repos/{repo}/pulls"
-        params = {"state": state}
-        resp = requests.get(url, headers=self.headers, params=params, timeout=30)
-        resp.raise_for_status()
-        return resp.json()
+        all_items = []
+        page = 1
+        while page <= 50:
+            params = {"state": state, "per_page": 100, "page": page}
+            resp = requests.get(url, headers=self.headers, params=params, timeout=30)
+            resp.raise_for_status()
+            batch = resp.json()
+            if not isinstance(batch, list):
+                break
+            all_items.extend(batch)
+            if len(batch) < 100:
+                break
+            page += 1
+        return all_items

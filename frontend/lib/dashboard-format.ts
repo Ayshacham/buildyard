@@ -40,6 +40,16 @@ export function formatRelativeShort(isoTimestamp: string | null): string {
 	return `${daysAgo}d ago`;
 }
 
+export function formatLastSessionDays(isoTimestamp: string | null): string {
+	if (!isoTimestamp) return 'No sessions yet';
+	const parsed = new Date(isoTimestamp).getTime();
+	if (Number.isNaN(parsed)) return 'No sessions yet';
+	const daysAgo = Math.floor((Date.now() - parsed) / 86400000);
+	if (daysAgo <= 0) return 'Today';
+	if (daysAgo === 1) return '1 day ago';
+	return `${daysAgo} days ago`;
+}
+
 export function projectActivityStatus(
 	project: ProjectListItem,
 ): 'active' | 'stale' {

@@ -50,6 +50,19 @@ export function getBreadcrumbsFromPath(
 		return { breadcrumbs: baseCrumbs, title: 'Dashboard' };
 	}
 
+	if (pathname.startsWith('/projects/') && pathname !== '/projects') {
+		const segments = pathname.split('/').filter(Boolean);
+		if (segments[0] === 'projects' && segments.length === 2) {
+			return {
+				breadcrumbs: [
+					baseCrumbs[0],
+					{ label: 'Projects', href: '/projects' },
+				],
+				title: 'Project',
+			};
+		}
+	}
+
 	const menuTrail = findTrailInMenu(menuItems, pathname);
 
 	if (menuTrail) {

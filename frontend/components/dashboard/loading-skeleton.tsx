@@ -11,17 +11,17 @@ export const LoadingSkeleton = () => {
 				{[1, 2, 3, 4].map((i) => (
 					<div
 						key={i}
-						className="h-28 animate-pulse rounded-[1.75rem] bg-muted/30"
+						className="h-28 animate-pulse rounded-[1.75rem] bg-muted/50"
 					/>
 				))}
 			</div>
 			<div className="grid gap-4 lg:grid-cols-2">
-				<div className="h-72 animate-pulse rounded-[1.75rem] bg-muted/30" />
-				<div className="h-72 animate-pulse rounded-[1.75rem] bg-muted/30" />
+				<div className="h-72 animate-pulse rounded-[1.75rem] bg-muted/50" />
+				<div className="h-72 animate-pulse rounded-[1.75rem] bg-muted/50" />
 			</div>
 			<div className="grid gap-4 lg:grid-cols-2">
-				<div className="h-64 animate-pulse rounded-[1.75rem] bg-muted/30" />
-				<div className="h-64 animate-pulse rounded-[1.75rem] bg-muted/30" />
+				<div className="h-64 animate-pulse rounded-[1.75rem] bg-muted/50" />
+				<div className="h-64 animate-pulse rounded-[1.75rem] bg-muted/50" />
 			</div>
 		</div>
 	);

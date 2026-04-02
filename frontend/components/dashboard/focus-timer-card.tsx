@@ -74,7 +74,7 @@ export function FocusTimerCard({
 	})();
 
 	return (
-		<SoftCard>
+		<SoftCard className="overflow-hidden">
 			<CardHeader className="flex flex-row items-start justify-between gap-3 px-6 pb-2 pt-6">
 				<div className="space-y-1">
 					<CardTitle className="text-lg">Focus timer</CardTitle>
@@ -82,22 +82,22 @@ export function FocusTimerCard({
 				</div>
 				<Badge
 					variant="secondary"
-					className="shrink-0 border-0 bg-muted font-medium"
+					className="shrink-0 border-0 bg-background/80 font-medium shadow-sm"
 				>
 					{badgeLabel}
 				</Badge>
 			</CardHeader>
 
 			<CardContent className="space-y-4 px-6 pb-6 pt-0">
-				<div className="rounded-2xl border border-dashed border-border/60 bg-muted/20 px-6 py-8 text-center dark:bg-white/[0.03]">
+				<div className="rounded-2xl bg-background/70 px-6 py-8 text-center shadow-inner ring-1 ring-black/5 dark:bg-white/5 dark:ring-white/10">
 					<p className="font-mono text-4xl font-medium tabular-nums tracking-tight text-foreground md:text-5xl">
 						{isLoadingActive
 							? '—:—'
 							: hasActiveSession
-							? timeLabel
-							: idlePreview}
+								? timeLabel
+								: idlePreview}
 					</p>
-					<div className="mx-auto mt-4 max-w-xs">
+					<div className="mx-auto mt-5 max-w-xs">
 						<LinearProgress
 							fractionComplete={hasActiveSession ? progressFraction : 0}
 						/>

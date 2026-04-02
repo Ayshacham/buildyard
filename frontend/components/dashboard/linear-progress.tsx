@@ -14,7 +14,7 @@ export function LinearProgress({
 	return (
 		<div
 			className={cn(
-				'h-1.5 w-full overflow-hidden rounded-full bg-muted/80 dark:bg-white/10',
+				'h-2 w-full overflow-hidden rounded-full bg-black/[0.08] dark:bg-white/15',
 				className,
 			)}
 		>

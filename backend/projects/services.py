@@ -2,11 +2,28 @@ from datetime import timedelta
 from django.utils import timezone
 
 
+def week_stats_for_project(project):
+    week_ago = timezone.now() - timedelta(days=7)
+    commits_this_week = project.commits.filter(committed_at__gte=week_ago).count()
+    focus_minutes = sum(
+        s.duration_minutes or 0
+        for s in project.sessions.filter(started_at__gte=week_ago, completed=True)
+    )
+    tasks_done = project.tasks.filter(
+        status="done",
+        completed_at__gte=week_ago,
+    ).count()
+    return {
+        "commits_this_week": commits_this_week,
+        "focus_minutes_this_week": focus_minutes,
+        "tasks_completed_this_week": tasks_done,
+    }
+
+
 def calculate_health_score(project):
     now = timezone.now()
-    week_ago = now - timedelta(days=7)
-
-    commits_this_week = project.commits.filter(committed_at__gte=week_ago).count()
+    stats = week_stats_for_project(project)
+    commits_this_week = stats["commits_this_week"]
     open_prs = project.pull_requests.filter(state="open")
     open_prs_count = open_prs.count()
 
@@ -15,15 +32,8 @@ def calculate_health_score(project):
         ages = [(now - pr.pr_opened_at).days for pr in open_prs if pr.pr_opened_at]
         avg_pr_age = sum(ages) // len(ages) if ages else 0
 
-    focus_minutes = sum(
-        s.duration_minutes or 0
-        for s in project.sessions.filter(started_at__gte=week_ago, completed=True)
-    )
-
-    tasks_done = project.tasks.filter(
-        status="done",
-        completed_at__gte=week_ago,
-    ).count()
+    focus_minutes = stats["focus_minutes_this_week"]
+    tasks_done = stats["tasks_completed_this_week"]
 
     days_since_commit = (
         (now - project.last_commit_at).days if project.last_commit_at else 999

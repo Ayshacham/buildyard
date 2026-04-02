@@ -42,7 +42,7 @@ export function AddProjectDialog({ open, onOpenChange }: AddProjectDialogProps) 
 	const { mutate, isPending, isError, error, reset } = useMutation({
 		mutationFn: createProject,
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: queryKeys.projects.list() });
+			queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
 			onOpenChange(false);
 		},
 	});

@@ -1,7 +1,11 @@
+import logging
 from datetime import datetime, timedelta
+
 from celery import shared_task
 
 from .github import GithubClient
+
+logger = logging.getLogger(__name__)
 
 
 def _parse_iso(s):
@@ -23,9 +27,7 @@ def sync_project_github(project_id):
         return
 
     user = project.user
-    token = getattr(user, "github_token", None)
-    if not token:
-        return
+    token = (getattr(user, "github_token", None) or "").strip() or None
 
     client = GithubClient(token)
     repo = project.github_repo
@@ -34,10 +36,20 @@ def sync_project_github(project_id):
     if project.last_commit_at:
         since = project.last_commit_at - timedelta(days=1)
 
+    commits_data = []
     try:
         commits_data = client.get_commits(repo, since=since)
     except Exception:
-        return
+        if since is not None:
+            try:
+                commits_data = client.get_commits(repo, since=None)
+            except Exception:
+                commits_data = []
+        else:
+            commits_data = []
+
+    if not isinstance(commits_data, list):
+        commits_data = []
 
     latest_commit_at = None
     for c in commits_data:
@@ -71,13 +83,20 @@ def sync_project_github(project_id):
         if committed_at and (not latest_commit_at or committed_at > latest_commit_at):
             latest_commit_at = committed_at
 
+    open_prs = []
     try:
         open_prs = client.get_pull_requests(repo, state="open")
     except Exception:
+        logger.exception("GitHub PR list failed for %s", repo)
+        open_prs = []
+
+    if not isinstance(open_prs, list):
         open_prs = []
 
     for pr in open_prs:
         pr_number = pr.get("number")
+        if pr_number is None:
+            continue
         title = pr.get("title", "")
         state = pr.get("state", "open")
         if state == "closed" and pr.get("merged_at"):
@@ -115,9 +134,9 @@ def sync_project_github(project_id):
 def sync_all_active_projects():
     from projects.models import Project
 
-    for project in Project.objects.filter(status="active"):
-        if project.github_repo:
-            sync_project_github.delay(str(project.id))  # type: ignore[attr-defined]
+    qs = Project.objects.exclude(github_repo="")
+    for project in qs.iterator():
+        sync_project_github.delay(str(project.id))  # type: ignore[attr-defined]
 
 
 @shared_task

@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Project, GithubPR, GithubCommit, HealthSnapshot
 from .github_repo_validation import validate_github_repo_for_user
+from .services import week_stats_for_project
 
 
 class GithubCommitSerializer(serializers.ModelSerializer):
@@ -103,6 +104,9 @@ class ProjectSerializer(serializers.ModelSerializer):
     recent_commits = serializers.SerializerMethodField()
     open_prs = serializers.SerializerMethodField()
     latest_health = serializers.SerializerMethodField()
+    commits_this_week = serializers.SerializerMethodField()
+    focus_minutes_this_week = serializers.SerializerMethodField()
+    tasks_completed_this_week = serializers.SerializerMethodField()
 
     class Meta:  # pyright: ignore[reportIncompatibleVariableOverride]
         model = Project
@@ -120,6 +124,9 @@ class ProjectSerializer(serializers.ModelSerializer):
             "last_session_at",
             "last_commit_at",
             "created_at",
+            "commits_this_week",
+            "focus_minutes_this_week",
+            "tasks_completed_this_week",
             "recent_commits",
             "open_prs",
             "latest_health",
@@ -138,6 +145,23 @@ class ProjectSerializer(serializers.ModelSerializer):
         if not user or not user.is_authenticated:
             return (value or "").strip()
         return validate_github_repo_for_user(user, value)
+
+    def _week_stats(self, obj):
+        if not hasattr(self, "_week_stats_cache"):
+            self._week_stats_cache = {}
+        oid = obj.pk
+        if oid not in self._week_stats_cache:
+            self._week_stats_cache[oid] = week_stats_for_project(obj)
+        return self._week_stats_cache[oid]
+
+    def get_commits_this_week(self, obj):
+        return self._week_stats(obj)["commits_this_week"]
+
+    def get_focus_minutes_this_week(self, obj):
+        return self._week_stats(obj)["focus_minutes_this_week"]
+
+    def get_tasks_completed_this_week(self, obj):
+        return self._week_stats(obj)["tasks_completed_this_week"]
 
     def get_recent_commits(self, obj):
         commits = obj.commits.order_by("-committed_at")[:5]

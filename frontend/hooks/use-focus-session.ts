@@ -25,7 +25,7 @@ import { sessionsQueries } from '@/queries/sessions';
 function invalidateDashboardData(queryClient: ReturnType<typeof useQueryClient>) {
 	queryClient.invalidateQueries({ queryKey: queryKeys.accounts.me() });
 	queryClient.invalidateQueries({ queryKey: queryKeys.accounts.streak() });
-	queryClient.invalidateQueries({ queryKey: queryKeys.projects.list() });
+	queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
 }
 
 export function useFocusSession({

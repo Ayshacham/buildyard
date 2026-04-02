@@ -71,3 +71,76 @@ export type ProjectListItem = {
 	open_prs_count: number;
 	recent_commit: unknown;
 };
+
+export type HealthSnapshotApi = {
+	id: string;
+	health_score: number;
+	commits_this_week: number;
+	open_prs: number;
+	avg_pr_age_days: number;
+	focus_minutes_this_week: number;
+	tasks_completed_this_week: number;
+	status: string;
+	signals: unknown;
+	snapped_at: string;
+};
+
+export type GithubPRApi = {
+	id: string;
+	pr_number: number;
+	title: string;
+	state: string;
+	author: string;
+	url: string;
+	additions: number;
+	deletions: number;
+	comments_count: number;
+	pr_opened_at: string | null;
+	pr_merged_at: string | null;
+	age_days: number | null;
+};
+
+export type GithubCommitApi = {
+	id: string;
+	sha: string;
+	sha_short: string;
+	message: string;
+	author_name: string;
+	committed_at: string | null;
+	url: string;
+};
+
+export type ProjectDetail = {
+	id: string;
+	name: string;
+	description: string;
+	color: string;
+	status: string;
+	github_repo: string;
+	github_default_branch: string;
+	health_score: number | null;
+	last_context: string;
+	total_focus_minutes: number;
+	last_session_at: string | null;
+	last_commit_at: string | null;
+	created_at: string;
+	commits_this_week: number;
+	focus_minutes_this_week: number;
+	tasks_completed_this_week: number;
+	recent_commits: GithubCommitApi[];
+	open_prs: GithubPRApi[];
+	latest_health: HealthSnapshotApi | null;
+};
+
+export type ProjectTask = {
+	id: string;
+	project: string;
+	parent_task: string | null;
+	title: string;
+	is_micro_task: boolean;
+	estimated_minutes: number | null;
+	status: 'todo' | 'in_progress' | 'done';
+	priority: 'low' | 'medium' | 'high';
+	completed_at: string | null;
+	created_at: string;
+};
