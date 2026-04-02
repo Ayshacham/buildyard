@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Project, GithubPR, GithubCommit, HealthSnapshot
+from .github_repo_validation import validate_github_repo_for_user
 
 
 class GithubCommitSerializer(serializers.ModelSerializer):
@@ -130,6 +131,13 @@ class ProjectSerializer(serializers.ModelSerializer):
             "last_session_at",
             "last_commit_at",
         ]
+
+    def validate_github_repo(self, value):
+        request = self.context.get("request")
+        user = getattr(request, "user", None) if request else None
+        if not user or not user.is_authenticated:
+            return (value or "").strip()
+        return validate_github_repo_for_user(user, value)
 
     def get_recent_commits(self, obj):
         commits = obj.commits.order_by("-committed_at")[:5]

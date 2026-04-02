@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 import {
 	CardTitle,
 	CardHeader,
@@ -30,8 +32,14 @@ export function ProjectsCard({ projects }: { projects: ProjectListItem[] }) {
 			<CardContent className="px-6 pb-6 pt-0">
 				{projects?.length === 0 ? (
 					<p className="rounded-xl border border-dashed border-border/50 bg-muted/30 p-4 text-sm text-muted-foreground dark:bg-white/3">
-						No projects yet—use &quot;New project&quot; in the header to connect
-						a repo.
+						No projects yet—open{' '}
+						<Link
+							href="/projects"
+							className="font-medium text-primary underline-offset-4 hover:underline"
+						>
+							Projects
+						</Link>{' '}
+						and use &quot;New project&quot; to add one.
 					</p>
 				) : (
 					<ul className="space-y-3">

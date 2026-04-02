@@ -1,7 +1,6 @@
 'use client';
 
 import * as React from 'react';
-import { PlusIcon } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 
 import {
@@ -12,13 +11,6 @@ import {
 	BreadcrumbPage,
 	BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import {
-	Sheet,
-	SheetTitle,
-	SheetHeader,
-	SheetContent,
-	SheetDescription,
-} from '@/components/ui/sheet';
 
 import { Separator } from '@/components/ui/separator';
 import { SidebarTrigger } from '@/components/ui/sidebar';
@@ -29,10 +21,7 @@ import { getBreadcrumbsFromPath } from '@/utils/get-breadcrumbs';
 
 import { useStreak } from '@/hooks/use-streak';
 
-import { useUiStore } from '@/stores/ui-store';
-
 import { Badge } from '../ui/badge';
-import { Button } from '../ui/button';
 
 type HeaderProps = {
 	title?: string;
@@ -45,9 +34,6 @@ export function Header({
 }: HeaderProps) {
 	const streak = useStreak();
 	const streakDays = streak.isSuccess ? streak.data.current_streak : null;
-
-	const newProjectOpen = useUiStore((s) => s.newProjectOpen);
-	const setNewProjectOpen = useUiStore((s) => s.setNewProjectOpen);
 
 	const pathname = usePathname();
 	const { breadcrumbs, title } = getBreadcrumbsFromPath(pathname, menuItems);
@@ -90,30 +76,8 @@ export function Header({
 					>
 						{streakDays === null ? 'Streak' : `${streakDays}-day streak`}
 					</Badge>
-
-					<Button
-						size="lg"
-						variant="soft"
-						className="rounded-full bg-primary text-white/90"
-						type="button"
-						onClick={() => setNewProjectOpen(true)}
-					>
-						<PlusIcon className="size-4" />
-						New project
-					</Button>
 				</div>
 			</header>
-
-			<Sheet open={newProjectOpen} onOpenChange={setNewProjectOpen}>
-				<SheetContent side="right" className="sm:max-w-md">
-					<SheetHeader>
-						<SheetTitle>New project</SheetTitle>
-						<SheetDescription>
-							Connect a repo and track focus here—form wiring comes next.
-						</SheetDescription>
-					</SheetHeader>
-				</SheetContent>
-			</Sheet>
 		</>
 	);
 }
