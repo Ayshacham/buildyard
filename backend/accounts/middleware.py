@@ -1,7 +1,10 @@
 import jwt
+from jwt import PyJWKClient
 from django.conf import settings
 from channels.db import database_sync_to_async
 from .models import User
+
+jwks_client = PyJWKClient(f"{settings.SUPABASE_URL}/auth/v1/.well-known/jwks.json")
 
 
 @database_sync_to_async
@@ -9,10 +12,11 @@ def get_user_from_token(token):
     if not token:
         return None
     try:
+        signing_key = jwks_client.get_signing_key_from_jwt(token)
         payload = jwt.decode(
             token,
-            settings.SUPABASE_JWT_SECRET,
-            algorithms=["HS256"],
+            signing_key.key,
+            algorithms=["ES256"],
             options={"verify_aud": False},
         )
     except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):

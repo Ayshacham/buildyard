@@ -1,8 +1,11 @@
 import jwt
+from jwt import PyJWKClient
 from django.conf import settings
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 from .models import User
+
+jwks_client = PyJWKClient(f"{settings.SUPABASE_URL}/auth/v1/.well-known/jwks.json")
 
 
 class SupabaseAuthentication(BaseAuthentication):
@@ -14,10 +17,11 @@ class SupabaseAuthentication(BaseAuthentication):
         token = auth_header.split(" ")[1]
 
         try:
+            signing_key = jwks_client.get_signing_key_from_jwt(token)
             payload = jwt.decode(
                 token,
-                settings.SUPABASE_JWT_SECRET,
-                algorithms=["HS256"],
+                signing_key.key,
+                algorithms=["ES256"],
                 options={"verify_aud": False},
             )
         except jwt.ExpiredSignatureError:

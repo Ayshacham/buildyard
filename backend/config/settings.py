@@ -158,7 +158,6 @@ REST_FRAMEWORK = {
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_JWT_SECRET = os.getenv("SUPABASE_JWT_SECRET")
 
 CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
 
