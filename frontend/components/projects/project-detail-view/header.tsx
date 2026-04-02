@@ -1,4 +1,9 @@
-import { ExternalLinkIcon, PlayIcon, TimerIcon } from 'lucide-react';
+import {
+	ExternalLinkIcon,
+	PencilIcon,
+	PlayIcon,
+	TimerIcon,
+} from 'lucide-react';
 
 import { projectStatusBadgeClass } from '@/components/projects/project-status-badges';
 import { Badge } from '@/components/ui/badge';
@@ -19,9 +24,9 @@ type ProjectDetailHeaderProps = {
 	lastSessionAt: string | null;
 	sessionForThisProject: boolean;
 	sessionForOtherProject: boolean;
-	startPending: boolean;
 	userPending: boolean;
-	onStartSession: () => void;
+	onOpenStartFocus: () => void;
+	onEditProject: () => void;
 };
 
 export function ProjectDetailHeader({
@@ -33,9 +38,9 @@ export function ProjectDetailHeader({
 	lastSessionAt,
 	sessionForThisProject,
 	sessionForOtherProject,
-	startPending,
 	userPending,
-	onStartSession,
+	onOpenStartFocus,
+	onEditProject,
 }: ProjectDetailHeaderProps) {
 	return (
 		<div className="flex flex-wrap items-start justify-between gap-4">
@@ -46,9 +51,21 @@ export function ProjectDetailHeader({
 						style={{ backgroundColor: color }}
 						aria-hidden
 					/>
-					<h1 className="text-2xl font-semibold tracking-tight text-foreground">
-						{name}
-					</h1>
+					<div className="flex min-w-0 items-center gap-1">
+						<h1 className="text-2xl font-semibold tracking-tight text-foreground">
+							{name}
+						</h1>
+						<Button
+							type="button"
+							variant="ghost"
+							size="icon"
+							className="size-9 shrink-0 text-muted-foreground hover:text-foreground"
+							aria-label="Edit project"
+							onClick={onEditProject}
+						>
+							<PencilIcon className="size-4" />
+						</Button>
+					</div>
 					<Badge
 						variant="secondary"
 						className={cn(
@@ -109,8 +126,8 @@ export function ProjectDetailHeader({
 					variant="soft"
 					className="shrink-0 rounded-full bg-primary text-primary-foreground"
 					type="button"
-					disabled={startPending || userPending}
-					onClick={onStartSession}
+					disabled={userPending}
+					onClick={onOpenStartFocus}
 				>
 					<PlayIcon className="size-4" />
 					Start focus session

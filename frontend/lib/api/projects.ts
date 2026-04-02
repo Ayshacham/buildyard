@@ -1,5 +1,7 @@
 import { api } from '@/lib/api/axios';
 import type {
+	CreateProjectTaskInput,
+	PatchProjectTaskInput,
 	ProjectDetail,
 	ProjectListItem,
 	ProjectTask,
@@ -21,6 +23,32 @@ export async function listProjectTasks(projectId: string) {
 		.then((r) => r.data);
 }
 
+export async function createProjectTask(
+	projectId: string,
+	input: CreateProjectTaskInput,
+) {
+	return await api
+		.post<ProjectTask>(`/api/projects/${projectId}/tasks/`, input)
+		.then((r) => r.data);
+}
+
+export async function updateProjectTask(
+	projectId: string,
+	taskId: string,
+	input: PatchProjectTaskInput,
+) {
+	return await api
+		.patch<ProjectTask>(
+			`/api/projects/${projectId}/tasks/${taskId}/`,
+			input,
+		)
+		.then((r) => r.data);
+}
+
+export async function deleteProjectTask(projectId: string, taskId: string) {
+	await api.delete(`/api/projects/${projectId}/tasks/${taskId}/`);
+}
+
 export type CreateProjectInput = {
 	name: string;
 	description?: string;
@@ -30,6 +58,15 @@ export type CreateProjectInput = {
 
 export async function createProject(input: CreateProjectInput) {
 	return await api
-		.post<unknown>('/api/projects/', input)
+		.post<ProjectDetail>('/api/projects/', input)
+		.then((r) => r.data);
+}
+
+export async function updateProject(
+	projectId: string,
+	input: Partial<CreateProjectInput>,
+) {
+	return await api
+		.patch<ProjectDetail>(`/api/projects/${projectId}/`, input)
 		.then((r) => r.data);
 }

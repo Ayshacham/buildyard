@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { PlusIcon } from 'lucide-react';
+import { PencilIcon, PlusIcon } from 'lucide-react';
 
 import {
 	Dialog,
@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { createProject } from '@/lib/api/projects';
+import { createProject, updateProject } from '@/lib/api/projects';
 import { getApiErrorMessage } from '@/lib/api/errors';
 import { queryKeys } from '@/queries/keys';
 
@@ -27,22 +27,73 @@ const PRESET_COLORS = [
 	'#0ea5e9',
 ] as const;
 
+export type ProjectFormValues = {
+	id: string;
+	name: string;
+	description: string;
+	color: string;
+	github_repo: string;
+};
+
 type AddProjectDialogProps = {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
+	project?: ProjectFormValues | null;
 };
 
-export function AddProjectDialog({ open, onOpenChange }: AddProjectDialogProps) {
+export function AddProjectDialog({
+	open,
+	onOpenChange,
+	project,
+}: AddProjectDialogProps) {
 	const queryClient = useQueryClient();
+	const isEdit = Boolean(project);
 	const [name, setName] = React.useState('');
 	const [description, setDescription] = React.useState('');
 	const [color, setColor] = React.useState<string>(PRESET_COLORS[0]);
 	const [githubRepo, setGithubRepo] = React.useState('');
 
 	const { mutate, isPending, isError, error, reset } = useMutation({
-		mutationFn: createProject,
+		mutationFn: (
+			payload:
+				| {
+						mode: 'create';
+						name: string;
+						color: string;
+						description?: string;
+						github_repo?: string;
+				  }
+				| {
+						mode: 'edit';
+						projectId: string;
+						name: string;
+						color: string;
+						description: string;
+						github_repo: string;
+				  },
+		) => {
+			if (payload.mode === 'edit') {
+				return updateProject(payload.projectId, {
+					name: payload.name,
+					color: payload.color,
+					description: payload.description,
+					github_repo: payload.github_repo,
+				});
+			}
+			return createProject({
+				name: payload.name,
+				color: payload.color,
+				...(payload.description ? { description: payload.description } : {}),
+				...(payload.github_repo ? { github_repo: payload.github_repo } : {}),
+			});
+		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
+			if (isEdit && project) {
+				queryClient.invalidateQueries({
+					queryKey: queryKeys.projects.detail(project.id),
+				});
+			}
 			onOpenChange(false);
 		},
 	});
@@ -54,13 +105,18 @@ export function AddProjectDialog({ open, onOpenChange }: AddProjectDialogProps) 
 	}, [open, reset]);
 
 	React.useEffect(() => {
-		if (!open) {
+		if (open && project) {
+			setName(project.name);
+			setDescription(project.description ?? '');
+			setColor(project.color);
+			setGithubRepo(project.github_repo ?? '');
+		} else if (open && !project) {
 			setName('');
 			setDescription('');
 			setColor(PRESET_COLORS[0]);
 			setGithubRepo('');
 		}
-	}, [open]);
+	}, [open, project]);
 
 	function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
@@ -68,19 +124,33 @@ export function AddProjectDialog({ open, onOpenChange }: AddProjectDialogProps) 
 		if (!trimmedName) return;
 		const desc = description.trim();
 		const repo = githubRepo.trim();
-		mutate({
-			name: trimmedName,
-			color,
-			...(desc ? { description: desc } : {}),
-			...(repo ? { github_repo: repo } : {}),
-		});
+		if (isEdit && project) {
+			mutate({
+				mode: 'edit',
+				projectId: project.id,
+				name: trimmedName,
+				color,
+				description: desc,
+				github_repo: repo,
+			});
+		} else {
+			mutate({
+				mode: 'create',
+				name: trimmedName,
+				color,
+				...(desc ? { description: desc } : {}),
+				...(repo ? { github_repo: repo } : {}),
+			});
+		}
 	}
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent className="sm:max-w-md">
 				<DialogHeader>
-					<DialogTitle>New project</DialogTitle>
+					<DialogTitle>
+						{isEdit ? 'Edit project' : 'New project'}
+					</DialogTitle>
 					<DialogDescription>
 						Name your project, pick a color, and optionally link a GitHub repo.
 					</DialogDescription>
@@ -162,10 +232,7 @@ export function AddProjectDialog({ open, onOpenChange }: AddProjectDialogProps) 
 						/>
 					</div>
 					{isError ? (
-						<p
-							role="alert"
-							className="text-sm text-destructive"
-						>
+						<p role="alert" className="text-sm text-destructive">
 							{getApiErrorMessage(error)}
 						</p>
 					) : null}
@@ -179,8 +246,12 @@ export function AddProjectDialog({ open, onOpenChange }: AddProjectDialogProps) 
 							Cancel
 						</Button>
 						<Button type="submit" disabled={isPending}>
-							<PlusIcon className="size-4" />
-							Add project
+							{isEdit ? (
+								<PencilIcon className="size-4" />
+							) : (
+								<PlusIcon className="size-4" />
+							)}
+							{isEdit ? 'Save changes' : 'Add project'}
 						</Button>
 					</DialogFooter>
 				</form>

@@ -5,6 +5,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import { toast } from 'sonner';
 
+import { AddProjectDialog } from '@/components/projects/add-project-dialog';
+import { StartFocusSessionDialog } from '@/components/projects/start-focus-session-dialog';
+import { ProjectAdhdToolsCard } from '@/components/projects/project-detail-view/adhd-tools-card';
 import { ProjectContextCard } from '@/components/projects/project-detail-view/context-card';
 import { ProjectDetailHeader } from '@/components/projects/project-detail-view/header';
 import { ProjectOpenPrsCard } from '@/components/projects/project-detail-view/open-prs-card';
@@ -17,12 +20,10 @@ import { ErrorState } from '@/components/ui/error-state';
 import { useMe } from '@/hooks/use-me';
 import { useProject } from '@/hooks/use-project';
 import { useProjectTasks } from '@/hooks/use-project-tasks';
+import { regenerateProjectContext } from '@/lib/api/ai';
 import { getApiErrorMessage } from '@/lib/api/errors';
-import { startFocusSession } from '@/lib/api/sessions';
-import {
-	effectiveElapsedSeconds,
-	formatMinutesSeconds,
-} from '@/lib/timer-display';
+import type { ProjectDetail } from '@/lib/api/types';
+import { effectiveElapsedSeconds } from '@/lib/timer-display';
 import { queryKeys } from '@/queries/keys';
 import { sessionsQueries } from '@/queries/sessions';
 import { githubRepoUrl } from '@/utils/github';
@@ -40,6 +41,9 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
 	const sessionForOtherProject =
 		Boolean(timer) && activeProjectId !== projectId;
 
+	const [startFocusOpen, setStartFocusOpen] = useState(false);
+	const [editOpen, setEditOpen] = useState(false);
+
 	const [liveTick, setLiveTick] = useState(0);
 	useEffect(() => {
 		if (!timer?.is_running || timer.is_paused) return;
@@ -53,19 +57,15 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
 		return Math.max(0, timer.planned_seconds - effectiveElapsedSeconds(timer));
 	}, [timer, liveTick]);
 
-	const startMutation = useMutation({
-		mutationFn: () =>
-			startFocusSession({
-				planned_duration_minutes: user?.focus_duration ?? 25,
-				project_id: projectId,
-			}),
+	const regenerateMutation = useMutation({
+		mutationFn: () => regenerateProjectContext(projectId),
 		onSuccess: (data) => {
-			queryClient.setQueryData(queryKeys.sessions.active(), {
-				timer: data.timer,
-				session: data.session,
-			});
-			queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
-			toast.success('Focus session started');
+			queryClient.setQueryData(
+				queryKeys.projects.detail(projectId),
+				(old: ProjectDetail | undefined) =>
+					old ? { ...old, last_context: data.last_context } : old,
+			);
+			toast.success('Context updated');
 		},
 		onError: (error: unknown) => {
 			toast.error(getApiErrorMessage(error));
@@ -94,12 +94,29 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
 
 	const project = projectQuery.data;
 	const tasks = tasksQuery.data ?? [];
-	const inProgress = tasks.filter((t) => t.status === 'in_progress');
-	const todo = tasks.filter((t) => t.status === 'todo');
 	const ghUrl = githubRepoUrl(project.github_repo);
 
 	return (
 		<div className="space-y-8">
+			<StartFocusSessionDialog
+				open={startFocusOpen}
+				onOpenChange={setStartFocusOpen}
+				projectId={projectId}
+				tasks={tasks}
+				plannedDurationMinutes={user?.focus_duration ?? 25}
+			/>
+			<AddProjectDialog
+				open={editOpen}
+				onOpenChange={setEditOpen}
+				project={{
+					id: project.id,
+					name: project.name,
+					description: project.description,
+					color: project.color,
+					github_repo: project.github_repo,
+				}}
+			/>
+
 			<ProjectDetailHeader
 				color={project.color}
 				name={project.name}
@@ -109,9 +126,9 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
 				lastSessionAt={project.last_session_at}
 				sessionForThisProject={sessionForThisProject}
 				sessionForOtherProject={sessionForOtherProject}
-				startPending={startMutation.isPending}
 				userPending={isUserPending}
-				onStartSession={() => startMutation.mutate()}
+				onOpenStartFocus={() => setStartFocusOpen(true)}
+				onEditProject={() => setEditOpen(true)}
 			/>
 
 			{sessionForThisProject && timer ? (
@@ -121,7 +138,11 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
 				/>
 			) : null}
 
-			<ProjectContextCard lastContext={project.last_context} />
+			<ProjectContextCard
+				lastContext={project.last_context}
+				onRegenerate={() => regenerateMutation.mutate()}
+				isRegenerating={regenerateMutation.isPending}
+			/>
 
 			<ProjectStatsRow
 				commitsThisWeek={project.commits_this_week ?? 0}
@@ -132,11 +153,11 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
 
 			<div className="grid gap-6 lg:grid-cols-2 lg:items-start">
 				<ProjectTasksCard
+					projectId={projectId}
 					isPending={tasksQuery.isPending}
 					isError={tasksQuery.isError}
 					error={tasksQuery.error}
-					inProgress={inProgress}
-					todo={todo}
+					tasks={tasks}
 				/>
 
 				<div className="space-y-6">
@@ -144,8 +165,14 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
 						pullRequests={project.open_prs}
 						repoFallbackUrl={ghUrl}
 					/>
+					<ProjectAdhdToolsCard
+						projectId={projectId}
+						projectName={project.name}
+						tasks={tasks}
+					/>
 				</div>
 			</div>
+
 			<ProjectRecentCommitsCard commits={project.recent_commits} />
 		</div>
 	);

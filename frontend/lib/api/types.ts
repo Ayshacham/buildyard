@@ -69,6 +69,7 @@ export type ProjectListItem = {
 	last_commit_at: string | null;
 	created_at: string;
 	open_prs_count: number;
+	open_prs_aging_count: number;
 	recent_commit: unknown;
 };
 
@@ -144,3 +145,17 @@ export type ProjectTask = {
 	completed_at: string | null;
 	created_at: string;
 };
+
+export type CreateProjectTaskInput = {
+	title: string;
+	priority?: ProjectTask['priority'];
+	status?: ProjectTask['status'];
+	estimated_minutes?: number | null;
+};
+
+export type PatchProjectTaskInput = Partial<{
+	title: string;
+	priority: ProjectTask['priority'];
+	status: ProjectTask['status'];
+	estimated_minutes: number | null;
+}>;

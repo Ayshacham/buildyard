@@ -70,6 +70,7 @@ class HealthSnapshotSerializer(serializers.ModelSerializer):
 
 class ProjectListSerializer(serializers.ModelSerializer):
     open_prs_count = serializers.SerializerMethodField()
+    open_prs_aging_count = serializers.SerializerMethodField()
     recent_commit = serializers.SerializerMethodField()
 
     class Meta:  # pyright: ignore[reportIncompatibleVariableOverride]
@@ -87,11 +88,24 @@ class ProjectListSerializer(serializers.ModelSerializer):
             "last_commit_at",
             "created_at",
             "open_prs_count",
+            "open_prs_aging_count",
             "recent_commit",
         ]
 
     def get_open_prs_count(self, obj):
         return obj.pull_requests.filter(state="open").count()
+
+    def get_open_prs_aging_count(self, obj):
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        cutoff = timezone.now() - timedelta(days=5)
+        return obj.pull_requests.filter(
+            state="open",
+            pr_opened_at__isnull=False,
+            pr_opened_at__lt=cutoff,
+        ).count()
 
     def get_recent_commit(self, obj):
         commit = obj.commits.first()

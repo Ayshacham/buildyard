@@ -62,7 +62,7 @@ class ProjectDetailView(generics.RetrieveUpdateDestroyAPIView):
             _enqueue_github_sync(instance.id)
 
 
-class ProjectTaskListView(generics.ListAPIView):
+class ProjectTaskListView(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = TaskSerializer
 
@@ -74,16 +74,33 @@ class ProjectTaskListView(generics.ListAPIView):
                 project_id=project_id,
                 project__user=self.request.user,
             )
-            .exclude(status="done")
             .annotate(
                 _section_order=Case(
                     When(status="in_progress", then=Value(0)),
                     When(status="todo", then=Value(1)),
-                    default=Value(2),
+                    When(status="done", then=Value(2)),
+                    default=Value(3),
                     output_field=IntegerField(),
                 )
             )
             .order_by("_section_order", "-created_at")
+        )
+
+    def perform_create(self, serializer):
+        project = get_object_or_404(Project, pk=self.kwargs["pk"], user=self.request.user)
+        serializer.save(project=project)
+
+
+class ProjectTaskDetailView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = TaskSerializer
+    lookup_url_kwarg = "task_id"
+
+    def get_queryset(self):
+        project_id = self.kwargs["pk"]
+        return Task.objects.filter(
+            project_id=project_id,
+            project__user=self.request.user,
         )
 
 
