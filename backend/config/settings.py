@@ -159,7 +159,17 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 
-CORS_ALLOWED_ORIGINS = os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
+def _cors_allowed_origins():
+    raw = os.getenv("CORS_ALLOWED_ORIGINS", "").strip()
+    if not raw:
+        return [
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+        ]
+    return [o.strip() for o in raw.split(",") if o.strip()]
+
+
+CORS_ALLOWED_ORIGINS = _cors_allowed_origins()
 
 CORS_ALLOW_CREDENTIALS = True
 

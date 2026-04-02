@@ -1,0 +1,29 @@
+---
+description: Small components, KISS/DRY, readable code, no comments
+alwaysApply: true
+---
+
+# Code style
+
+## Structure
+
+- Prefer **small, single-purpose modules**: split UI into focused components (one main concern per file). When a component file grows past ~150–200 lines or mixes unrelated sections, extract subcomponents or hooks.
+- **Colocate** what belongs together (component + its small helpers in the same folder when it stays readable).
+- **KISS**: choose the simplest approach that fits; avoid abstraction until the second real use case unless duplication is clearly harmful.
+
+## DRY
+
+- **Extract** repeated markup, logic, or constants instead of copy-pasting. Shared pure helpers belong in `utils/` or next to their domain; shared UI in `components/`.
+
+## Readability
+
+- **Names** carry the intent; prefer explicit variables over clever one-liners.
+- Match **existing project patterns** (imports, file layout, naming) before introducing new conventions.
+
+## Comments
+
+- **Do not add comments** in code unless the user explicitly asks for them or the behavior is impossible to express clearly with structure and naming alone (e.g. rare spec quirks, external API traps).
+
+## Scope
+
+- Change **only what the task requires**; no drive-by refactors or unrelated files in the same edit unless requested.

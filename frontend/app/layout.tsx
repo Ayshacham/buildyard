@@ -4,8 +4,11 @@ import { Geist, Geist_Mono, DM_Sans } from 'next/font/google';
 import './globals.css';
 
 import { cn } from '@/utils/cn';
+
 import { Toaster } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
+
+import { QueryProvider } from '@/components/providers/query-provider';
 
 const dmSans = DM_Sans({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -34,8 +37,10 @@ export default function RootLayout({
 			<body
 				className={`${geistSans.variable} ${geistMono.variable} antialiased`}
 			>
-				<TooltipProvider>{children}</TooltipProvider>
-				<Toaster />
+				<QueryProvider>
+					<TooltipProvider>{children}</TooltipProvider>
+					<Toaster />
+				</QueryProvider>
 			</body>
 		</html>
 	);
