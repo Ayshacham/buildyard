@@ -94,6 +94,7 @@ export function ProjectAdhdToolsCard({
 			queryClient.invalidateQueries({
 				queryKey: queryKeys.projects.tasks(projectId),
 			});
+			queryClient.invalidateQueries({ queryKey: queryKeys.tasks.user() });
 			toast.success('Subtasks created');
 			setBreakOpen(false);
 		},
@@ -112,7 +113,11 @@ export function ProjectAdhdToolsCard({
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="space-y-4 px-6 pb-6 pt-0">
-					<div className="flex gap-3 rounded-xl border border-border/40 bg-muted/15 px-3 py-3 dark:bg-white/5">
+					<button
+						type="button"
+						className="flex w-full gap-3 rounded-xl border border-border/40 bg-muted/15 px-3 py-3 text-left transition-colors hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:bg-white/5"
+						onClick={() => setDuckOpen(true)}
+					>
 						<span className="text-2xl" aria-hidden>
 							🦐
 						</span>
@@ -121,18 +126,17 @@ export function ProjectAdhdToolsCard({
 							<p className="text-sm text-muted-foreground">
 								Get unstuck on this project
 							</p>
-							<Button
-								type="button"
-								variant="secondary"
-								size="sm"
-								className="mt-2"
-								onClick={() => setDuckOpen(true)}
-							>
-								Talk it out
-							</Button>
+							<p className="pt-1 text-xs font-medium text-primary">
+								Open →
+							</p>
 						</div>
-					</div>
-					<div className="flex gap-3 rounded-xl border border-border/40 bg-muted/15 px-3 py-3 dark:bg-white/5">
+					</button>
+					<button
+						type="button"
+						disabled={selectable.length === 0}
+						className="flex w-full gap-3 rounded-xl border border-border/40 bg-muted/15 px-3 py-3 text-left transition-colors hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 dark:bg-white/5"
+						onClick={() => setBreakOpen(true)}
+					>
 						<span className="text-2xl" aria-hidden>
 							⚡
 						</span>
@@ -141,18 +145,13 @@ export function ProjectAdhdToolsCard({
 							<p className="text-sm text-muted-foreground">
 								Split into 15-min chunks
 							</p>
-							<Button
-								type="button"
-								variant="secondary"
-								size="sm"
-								className="mt-2"
-								onClick={() => setBreakOpen(true)}
-								disabled={selectable.length === 0}
-							>
-								Pick a task
-							</Button>
+							<p className="pt-1 text-xs font-medium text-primary">
+								{selectable.length === 0
+									? 'Add a task first'
+									: 'Open →'}
+							</p>
 						</div>
-					</div>
+					</button>
 				</CardContent>
 			</SoftCard>
 

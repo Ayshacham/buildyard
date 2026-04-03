@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { createProject, updateProject } from '@/lib/api/projects';
 import { getApiErrorMessage } from '@/lib/api/errors';
+import type { ProjectDetail } from '@/lib/api/types';
 import { queryKeys } from '@/queries/keys';
 
 const PRESET_COLORS = [
@@ -39,12 +40,14 @@ type AddProjectDialogProps = {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 	project?: ProjectFormValues | null;
+	onCreated?: (project: ProjectDetail) => void;
 };
 
 export function AddProjectDialog({
 	open,
 	onOpenChange,
 	project,
+	onCreated,
 }: AddProjectDialogProps) {
 	const queryClient = useQueryClient();
 	const isEdit = Boolean(project);
@@ -87,16 +90,21 @@ export function AddProjectDialog({
 				...(payload.github_repo ? { github_repo: payload.github_repo } : {}),
 			});
 		},
-		onSuccess: () => {
+		onSuccess: (data, variables) => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
-			if (isEdit && project) {
+			if (variables.mode === 'edit') {
 				queryClient.invalidateQueries({
-					queryKey: queryKeys.projects.detail(project.id),
+					queryKey: queryKeys.projects.detail(variables.projectId),
 				});
+			}
+			if (variables.mode === 'create') {
+				onCreated?.(data as ProjectDetail);
 			}
 			onOpenChange(false);
 		},
 	});
+
+	const prevOpenRef = React.useRef(false);
 
 	React.useEffect(() => {
 		if (open) {
@@ -105,17 +113,20 @@ export function AddProjectDialog({
 	}, [open, reset]);
 
 	React.useEffect(() => {
-		if (open && project) {
-			setName(project.name);
-			setDescription(project.description ?? '');
-			setColor(project.color);
-			setGithubRepo(project.github_repo ?? '');
-		} else if (open && !project) {
-			setName('');
-			setDescription('');
-			setColor(PRESET_COLORS[0]);
-			setGithubRepo('');
+		if (open && !prevOpenRef.current) {
+			if (project) {
+				setName(project.name);
+				setDescription(project.description ?? '');
+				setColor(project.color);
+				setGithubRepo(project.github_repo ?? '');
+			} else {
+				setName('');
+				setDescription('');
+				setColor(PRESET_COLORS[0]);
+				setGithubRepo('');
+			}
 		}
+		prevOpenRef.current = open;
 	}, [open, project]);
 
 	function handleSubmit(e: React.FormEvent<HTMLFormElement>) {

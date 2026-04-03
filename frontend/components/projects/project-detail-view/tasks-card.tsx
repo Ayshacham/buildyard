@@ -50,16 +50,39 @@ function TaskRow({
 	onEdit: () => void;
 	onDelete: () => void;
 }) {
+	const done = task.status === 'done';
 	return (
 		<li className="flex flex-col gap-2 rounded-lg border border-border/50 bg-muted/20 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between dark:bg-white/5">
-			<div className="min-w-0 flex-1 space-y-1">
-				<span className="font-medium text-foreground">{task.title}</span>
-				{task.estimated_minutes != null ? (
-					<p className="text-xs text-muted-foreground">
-						~{task.estimated_minutes} min
-					</p>
-				) : null}
-			</div>
+			<label className="flex min-w-0 flex-1 cursor-pointer items-start gap-3">
+				<input
+					type="checkbox"
+					checked={done}
+					disabled={busy}
+					onChange={() =>
+						onPatch({
+							status: done ? 'todo' : 'done',
+						})
+					}
+					className="mt-1.5 size-4 shrink-0 rounded border-input accent-primary"
+				/>
+				<span className="min-w-0 flex-1 space-y-1">
+					<span
+						className={cn(
+							'font-medium',
+							done
+								? 'text-muted-foreground line-through'
+								: 'text-foreground',
+						)}
+					>
+						{task.title}
+					</span>
+					{task.estimated_minutes != null ? (
+						<p className="text-xs text-muted-foreground">
+							~{task.estimated_minutes} min
+						</p>
+					) : null}
+				</span>
+			</label>
 			<div className="flex flex-wrap items-center gap-2 sm:justify-end">
 				<PriorityBadge priority={task.priority} />
 				<select
@@ -149,6 +172,7 @@ export function ProjectTasksCard({
 			queryClient.invalidateQueries({
 				queryKey: queryKeys.projects.detail(projectId),
 			});
+			queryClient.invalidateQueries({ queryKey: queryKeys.tasks.user() });
 			if (vars.patch.status) {
 				setTab(vars.patch.status);
 			}
@@ -168,6 +192,7 @@ export function ProjectTasksCard({
 			queryClient.invalidateQueries({
 				queryKey: queryKeys.projects.detail(projectId),
 			});
+			queryClient.invalidateQueries({ queryKey: queryKeys.tasks.user() });
 			toast.success('Task deleted');
 		},
 		onError: (err: unknown) => {

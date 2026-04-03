@@ -44,3 +44,14 @@ class TaskSerializer(serializers.ModelSerializer):
             task.completed_at = None
             task.save(update_fields=["completed_at"])
         return task
+
+
+class UserTaskListSerializer(TaskSerializer):
+    project_name = serializers.CharField(source="project.name", read_only=True)
+    project_color = serializers.CharField(source="project.color", read_only=True)
+
+    class Meta(TaskSerializer.Meta):  # pyright: ignore[reportIncompatibleVariableOverride]
+        fields = TaskSerializer.Meta.fields + [
+            "project_name",
+            "project_color",
+        ]

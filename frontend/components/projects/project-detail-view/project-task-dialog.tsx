@@ -46,20 +46,26 @@ export function ProjectTaskDialog({
 	const [status, setStatus] = React.useState<ProjectTask['status']>('todo');
 	const [estimatedMinutes, setEstimatedMinutes] = React.useState('');
 
+	const prevOpenRef = React.useRef(false);
 	React.useEffect(() => {
-		if (open && task) {
-			setTitle(task.title);
-			setPriority(task.priority);
-			setStatus(task.status);
-			setEstimatedMinutes(
-				task.estimated_minutes != null ? String(task.estimated_minutes) : '',
-			);
-		} else if (open && !task) {
-			setTitle('');
-			setPriority('medium');
-			setStatus('todo');
-			setEstimatedMinutes('');
+		if (open && !prevOpenRef.current) {
+			if (task) {
+				setTitle(task.title);
+				setPriority(task.priority);
+				setStatus(task.status);
+				setEstimatedMinutes(
+					task.estimated_minutes != null
+						? String(task.estimated_minutes)
+						: '',
+				);
+			} else {
+				setTitle('');
+				setPriority('medium');
+				setStatus('todo');
+				setEstimatedMinutes('');
+			}
 		}
+		prevOpenRef.current = open;
 	}, [open, task]);
 
 	const mutation = useMutation({
@@ -76,6 +82,7 @@ export function ProjectTaskDialog({
 			queryClient.invalidateQueries({
 				queryKey: queryKeys.projects.detail(projectId),
 			});
+			queryClient.invalidateQueries({ queryKey: queryKeys.tasks.user() });
 			toast.success(isEdit ? 'Task updated' : 'Task added');
 			onOpenChange(false);
 		},

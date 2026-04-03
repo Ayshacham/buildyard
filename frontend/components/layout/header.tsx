@@ -1,7 +1,11 @@
 'use client';
 
 import * as React from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { PlusIcon } from 'lucide-react';
+
+import { AddProjectDialog } from '@/components/projects/add-project-dialog';
+import { Button } from '@/components/ui/button';
 
 import {
 	Breadcrumb,
@@ -32,6 +36,8 @@ export function Header({
 	title: titleOverride,
 	breadcrumbs: breadcrumbsOverride,
 }: HeaderProps) {
+	const router = useRouter();
+	const [addProjectOpen, setAddProjectOpen] = React.useState(false);
 	const streak = useStreak();
 	const streakDays = streak.isSuccess ? streak.data.current_streak : null;
 
@@ -70,6 +76,21 @@ export function Header({
 				</div>
 
 				<div className="flex shrink-0 items-center gap-2">
+					<Button
+						type="button"
+						variant="secondary"
+						size="sm"
+						className="gap-1.5"
+						onClick={() => setAddProjectOpen(true)}
+					>
+						<PlusIcon className="size-4" />
+						<span className="hidden sm:inline">New project</span>
+					</Button>
+					<AddProjectDialog
+						open={addProjectOpen}
+						onOpenChange={setAddProjectOpen}
+						onCreated={(p) => router.push(`/projects/${p.id}`)}
+					/>
 					<Badge
 						variant="secondary"
 						className="hidden border-0 bg-emerald-500/30 font-medium text-emerald-900 shadow-none sm:inline-flex dark:bg-emerald-500/15 dark:text-emerald-200"

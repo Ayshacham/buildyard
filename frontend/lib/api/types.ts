@@ -159,3 +159,8 @@ export type PatchProjectTaskInput = Partial<{
 	status: ProjectTask['status'];
 	estimated_minutes: number | null;
 }>;
+
+export type UserTaskListItem = ProjectTask & {
+	project_name: string;
+	project_color: string;
+};

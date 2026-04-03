@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useRouter } from 'next/navigation';
 import { PlusIcon } from 'lucide-react';
 
 import { AddProjectDialog } from '@/components/projects/add-project-dialog';
@@ -31,6 +32,7 @@ function ProjectsGrid({ projects }: { projects: ProjectListItem[] }) {
 }
 
 export default function ProjectsPage() {
+	const router = useRouter();
 	const [addOpen, setAddOpen] = React.useState(false);
 	const { data: projects = [], isPending, isError, error } = useProjects();
 
@@ -80,7 +82,11 @@ export default function ProjectsPage() {
 				</Button>
 			</div>
 
-			<AddProjectDialog open={addOpen} onOpenChange={setAddOpen} />
+			<AddProjectDialog
+				open={addOpen}
+				onOpenChange={setAddOpen}
+				onCreated={(p) => router.push(`/projects/${p.id}`)}
+			/>
 
 			<section aria-labelledby="projects-heading">
 				<h2 id="projects-heading" className="sr-only">

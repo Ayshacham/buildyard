@@ -46,29 +46,31 @@ export function ProjectsCard({ projects }: { projects: ProjectListItem[] }) {
 						{projects?.slice(0, 8).map((project) => {
 							const status = projectActivityStatus(project);
 							return (
-								<li
-									key={project.id}
-									className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border/40 bg-muted/15 px-3 py-2.5 dark:bg-white/4"
-								>
-									<span className="font-medium text-foreground">
-										{project.name}
-									</span>
-									<div className="flex items-center gap-2 text-xs">
-										<Badge
-											variant="secondary"
-											className={cn(
-												'border-0 font-medium',
-												status === 'active'
-													? 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-300'
-													: 'bg-amber-500/15 text-amber-900 dark:text-amber-200',
-											)}
-										>
-											{status}
-										</Badge>
-										<span className="tabular-nums text-muted-foreground">
-											{formatRelativeShort(project.last_session_at)}
+								<li key={project.id}>
+									<Link
+										href={`/projects/${project.id}`}
+										className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border/40 bg-muted/15 px-3 py-2.5 transition-colors hover:bg-muted/30 dark:bg-white/4"
+									>
+										<span className="font-medium text-foreground">
+											{project.name}
 										</span>
-									</div>
+										<div className="flex items-center gap-2 text-xs">
+											<Badge
+												variant="secondary"
+												className={cn(
+													'border-0 font-medium',
+													status === 'active'
+														? 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-300'
+														: 'bg-amber-500/15 text-amber-900 dark:text-amber-200',
+												)}
+											>
+												{status}
+											</Badge>
+											<span className="tabular-nums text-muted-foreground">
+												{formatRelativeShort(project.last_session_at)}
+											</span>
+										</div>
+									</Link>
 								</li>
 							);
 						})}

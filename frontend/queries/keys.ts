@@ -15,4 +15,8 @@ export const queryKeys = {
 		all: ['sessions'] as const,
 		active: () => ['sessions', 'active'] as const,
 	},
+	tasks: {
+		all: ['tasks'] as const,
+		user: () => ['tasks', 'user'] as const,
+	},
 };
