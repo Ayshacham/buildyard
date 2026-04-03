@@ -15,6 +15,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { getApiErrorMessage } from '@/lib/api/errors';
 import { updateProjectTask } from '@/lib/api/projects';
+import { patchTask as patchUserTask } from '@/lib/api/tasks';
 import type { PatchProjectTaskInput, UserTaskListItem } from '@/lib/api/types';
 import { queryKeys } from '@/queries/keys';
 import { cn } from '@/utils/cn';
@@ -69,17 +70,27 @@ function TaskLine({
 				</span>
 			</label>
 			<div className="flex flex-wrap items-center gap-2 sm:ml-auto">
-				<Link
-					href={`/projects/${task.project}`}
-					className="inline-flex max-w-48 items-center gap-2 truncate text-sm font-medium text-primary hover:underline"
-				>
-					<span
-						className="size-2.5 shrink-0 rounded-full ring-1 ring-border"
-						style={{ backgroundColor: task.project_color }}
-						aria-hidden
-					/>
-					{task.project_name}
-				</Link>
+				{task.project ? (
+					<Link
+						href={`/projects/${task.project}`}
+						className="inline-flex max-w-48 items-center gap-2 truncate text-sm font-medium text-primary hover:underline"
+					>
+						<span
+							className="size-2.5 shrink-0 rounded-full ring-1 ring-border"
+							style={{ backgroundColor: task.project_color }}
+							aria-hidden
+						/>
+						{task.project_name}
+					</Link>
+				) : (
+					<span className="inline-flex max-w-48 items-center gap-2 truncate text-sm text-muted-foreground">
+						<span
+							className="size-2.5 shrink-0 rounded-full bg-muted-foreground/40 ring-1 ring-border"
+							aria-hidden
+						/>
+						Unassigned
+					</span>
+				)}
 				<PriorityBadge priority={task.priority} />
 				<select
 					aria-label="Task status"
@@ -95,6 +106,7 @@ function TaskLine({
 					<option value="todo">To do</option>
 					<option value="in_progress">In progress</option>
 					<option value="done">Done</option>
+					<option value="brain_dump">Brain dump</option>
 				</select>
 			</div>
 		</li>
@@ -105,22 +117,25 @@ export function TasksPageView({ tasks }: { tasks: UserTaskListItem[] }) {
 	const queryClient = useQueryClient();
 	const patchTask = useMutation({
 		mutationFn: ({
-			projectId,
-			taskId,
+			task,
 			patch,
 		}: {
-			projectId: string;
-			taskId: string;
+			task: UserTaskListItem;
 			patch: PatchProjectTaskInput;
-		}) => updateProjectTask(projectId, taskId, patch),
+		}) =>
+			task.project
+				? updateProjectTask(task.project, task.id, patch)
+				: patchUserTask(task.id, patch),
 		onSuccess: (_data, variables) => {
 			queryClient.invalidateQueries({ queryKey: queryKeys.tasks.user() });
-			queryClient.invalidateQueries({
-				queryKey: queryKeys.projects.tasks(variables.projectId),
-			});
-			queryClient.invalidateQueries({
-				queryKey: queryKeys.projects.detail(variables.projectId),
-			});
+			if (variables.task.project) {
+				queryClient.invalidateQueries({
+					queryKey: queryKeys.projects.tasks(variables.task.project),
+				});
+				queryClient.invalidateQueries({
+					queryKey: queryKeys.projects.detail(variables.task.project),
+				});
+			}
 			queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
 		},
 		onError: (err: unknown) => {
@@ -150,11 +165,7 @@ export function TasksPageView({ tasks }: { tasks: UserTaskListItem[] }) {
 								task={task}
 								busy={busy}
 								onPatch={(patch) =>
-									patchTask.mutate({
-										projectId: task.project,
-										taskId: task.id,
-										patch,
-									})
+									patchTask.mutate({ task, patch })
 								}
 							/>
 						))}

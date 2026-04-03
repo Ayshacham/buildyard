@@ -88,7 +88,7 @@ class ProjectTaskListView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         project = get_object_or_404(Project, pk=self.kwargs["pk"], user=self.request.user)
-        serializer.save(project=project)
+        serializer.save(project=project, owner=None)
 
 
 class ProjectTaskDetailView(generics.RetrieveUpdateDestroyAPIView):

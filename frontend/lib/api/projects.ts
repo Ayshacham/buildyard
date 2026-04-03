@@ -52,6 +52,7 @@ export async function deleteProjectTask(projectId: string, taskId: string) {
 export type CreateProjectInput = {
 	name: string;
 	description?: string;
+	goals?: string;
 	color: string;
 	github_repo?: string;
 };

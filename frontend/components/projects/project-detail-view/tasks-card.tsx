@@ -174,7 +174,10 @@ export function ProjectTasksCard({
 			});
 			queryClient.invalidateQueries({ queryKey: queryKeys.tasks.user() });
 			if (vars.patch.status) {
-				setTab(vars.patch.status);
+				const s = vars.patch.status;
+				if (s === 'todo' || s === 'in_progress' || s === 'done') {
+					setTab(s);
+				}
 			}
 		},
 		onError: (err: unknown) => {

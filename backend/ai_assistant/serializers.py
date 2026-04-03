@@ -27,6 +27,7 @@ class StandupSerializer(serializers.ModelSerializer):
             "standup_date",
             "raw_summary",
             "highlights",
+            "where_you_are",
             "blockers",
             "suggestions",
             "tokens_used",

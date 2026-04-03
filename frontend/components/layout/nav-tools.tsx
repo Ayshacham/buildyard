@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 import {
 	SidebarMenu,
 	SidebarGroup,
@@ -26,10 +28,10 @@ export function NavTools({ tools }: { tools: readonly Tool[] }) {
 					return (
 						<SidebarMenuItem key={tool.name}>
 							<SidebarMenuButton asChild>
-								<a href={tool.url}>
+								<Link href={tool.url}>
 									<Icon className="size-4" />
 									<span>{tool.name}</span>
-								</a>
+								</Link>
 							</SidebarMenuButton>
 						</SidebarMenuItem>
 					);

@@ -19,4 +19,9 @@ export const queryKeys = {
 		all: ['tasks'] as const,
 		user: () => ['tasks', 'user'] as const,
 	},
+	ai: {
+		all: ['ai'] as const,
+		standup: () => ['ai', 'standup'] as const,
+		standupHistory: () => ['ai', 'standupHistory'] as const,
+	},
 };

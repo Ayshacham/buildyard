@@ -7,8 +7,8 @@ export const sidebarConfig = {
     avatar: '/avatars/shadcn.jpg',
   },
   tools: [
-    { name: 'Focus Mode', url: '#', icon: BrainCogIcon },
-    { name: 'Brain Dump', url: '#', icon: BrainIcon },
-    { name: 'AI Standup', url: '#', icon: BotIcon },
+    { name: 'Focus Mode', url: '/dashboard', icon: BrainCogIcon },
+    { name: 'Brain Dump', url: '/dashboard/brain-dump', icon: BrainIcon },
+    { name: 'AI Standup', url: '/dashboard/ai', icon: BotIcon },
   ],
 } as const;

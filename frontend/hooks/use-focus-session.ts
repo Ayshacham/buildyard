@@ -1,10 +1,4 @@
-import {
-	useRef,
-	useState,
-	useEffect,
-	useCallback,
-	useLayoutEffect,
-} from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -17,7 +11,11 @@ import {
 } from '@/lib/api/sessions';
 import { getApiErrorMessage } from '@/lib/api/errors';
 import { formatMinutesSeconds } from '@/lib/timer-display';
-import type { ActiveSessionResponse, TimerStateApi } from '@/lib/api/types';
+import type {
+	ActiveSessionResponse,
+	FocusSessionApi,
+	TimerStateApi,
+} from '@/lib/api/types';
 
 import { queryKeys } from '@/queries/keys';
 import { sessionsQueries } from '@/queries/sessions';
@@ -124,7 +122,7 @@ export function useFocusSession({
 	const endMutation = useMutation({
 		mutationFn: (elapsedSeconds: number) =>
 			endFocusSession({ elapsed_seconds: elapsedSeconds }),
-		onSuccess: () => {
+		onSuccess: (session: FocusSessionApi) => {
 			lastTimerIdRef.current = null;
 			queryClient.setQueryData(queryKeys.sessions.active(), {
 				timer: null,
@@ -132,16 +130,16 @@ export function useFocusSession({
 			});
 			setLocalElapsedSeconds(0);
 			invalidateDashboardData(queryClient);
+			if (session.overrun_minutes > 0) {
+				toast.message('Past your planned block', {
+					description: `You went about ${session.overrun_minutes} minutes over. Consider a short break before the next focus block.`,
+				});
+			}
 		},
 		onError: (error: unknown) => {
 			toast.error(getApiErrorMessage(error));
 		},
 	});
-
-	const endMutateRef = useRef(endMutation.mutate);
-	useLayoutEffect(() => {
-		endMutateRef.current = endMutation.mutate;
-	}, [endMutation.mutate]);
 
 	const pauseMutation = useMutation({
 		mutationFn: (elapsedSeconds: number) =>
@@ -180,24 +178,6 @@ export function useFocusSession({
 		},
 	});
 
-	const running = Boolean(timer?.is_running && !timer?.is_paused);
-	const autoCompleted = useRef(false);
-
-	useEffect(() => {
-		if (!running) {
-			autoCompleted.current = false;
-		}
-	}, [running]);
-
-	useEffect(() => {
-		if (!running) return;
-		if (plannedSeconds <= 0) return;
-		if (localElapsedSeconds < plannedSeconds) return;
-		if (autoCompleted.current) return;
-		autoCompleted.current = true;
-		endMutateRef.current(plannedSeconds);
-	}, [localElapsedSeconds, plannedSeconds, running]);
-
 	const start = useCallback(() => {
 		startMutation.mutate();
 	}, [startMutation]);
@@ -230,7 +210,17 @@ export function useFocusSession({
 			? Math.min(1, localElapsedSeconds / plannedSeconds)
 			: 0;
 
-	const timeLabel = formatMinutesSeconds(remainingSeconds);
+	const overtimeSeconds =
+		timer && plannedSeconds > 0
+			? Math.max(0, localElapsedSeconds - plannedSeconds)
+			: 0;
+
+	const timeLabel =
+		timer && plannedSeconds > 0
+			? localElapsedSeconds < plannedSeconds
+				? formatMinutesSeconds(remainingSeconds)
+				: `+${formatMinutesSeconds(overtimeSeconds)}`
+			: formatMinutesSeconds(0);
 
 	return {
 		timer,

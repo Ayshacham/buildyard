@@ -9,6 +9,7 @@ class TaskSerializer(serializers.ModelSerializer):
         model = Task
         fields = [
             "id",
+            "owner",
             "project",
             "parent_task",
             "title",
@@ -21,12 +22,24 @@ class TaskSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = [
             "id",
-            "project",
+            "owner",
             "created_at",
             "completed_at",
             "parent_task",
             "is_micro_task",
         ]
+
+    def validate(self, attrs):
+        request = self.context.get("request")
+        if not request or not request.user.is_authenticated:
+            return attrs
+        user = request.user
+        project = attrs.get("project")
+        if project is not None and project.user_id != user.id:
+            raise serializers.ValidationError(
+                {"project": "You do not have access to this project."}
+            )
+        return attrs
 
     def create(self, validated_data):
         task = super().create(validated_data)
@@ -36,6 +49,9 @@ class TaskSerializer(serializers.ModelSerializer):
         return task
 
     def update(self, instance, validated_data):
+        project = validated_data.get("project", serializers.empty)
+        if project is not serializers.empty and project is not None:
+            validated_data["owner"] = None
         task = super().update(instance, validated_data)
         if task.status == "done" and not task.completed_at:
             task.completed_at = timezone.now()
@@ -47,11 +63,21 @@ class TaskSerializer(serializers.ModelSerializer):
 
 
 class UserTaskListSerializer(TaskSerializer):
-    project_name = serializers.CharField(source="project.name", read_only=True)
-    project_color = serializers.CharField(source="project.color", read_only=True)
+    project_name = serializers.SerializerMethodField()
+    project_color = serializers.SerializerMethodField()
 
     class Meta(TaskSerializer.Meta):  # pyright: ignore[reportIncompatibleVariableOverride]
         fields = TaskSerializer.Meta.fields + [
             "project_name",
             "project_color",
         ]
+
+    def get_project_name(self, obj):
+        if obj.project_id:
+            return obj.project.name
+        return ""
+
+    def get_project_color(self, obj):
+        if obj.project_id:
+            return obj.project.color
+        return "#888888"

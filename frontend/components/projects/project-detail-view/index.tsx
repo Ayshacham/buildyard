@@ -9,6 +9,7 @@ import { AddProjectDialog } from '@/components/projects/add-project-dialog';
 import { StartFocusSessionDialog } from '@/components/projects/start-focus-session-dialog';
 import { ProjectAdhdToolsCard } from '@/components/projects/project-detail-view/adhd-tools-card';
 import { ProjectContextCard } from '@/components/projects/project-detail-view/context-card';
+import { ProjectGoalsCard } from '@/components/projects/project-detail-view/project-goals-card';
 import { ProjectDetailHeader } from '@/components/projects/project-detail-view/header';
 import { ProjectOpenPrsCard } from '@/components/projects/project-detail-view/open-prs-card';
 import { ProjectRecentCommitsCard } from '@/components/projects/project-detail-view/recent-commits-card';
@@ -112,6 +113,7 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
 					id: project.id,
 					name: project.name,
 					description: project.description,
+					goals: project.goals ?? '',
 					color: project.color,
 					github_repo: project.github_repo,
 				}}
@@ -143,6 +145,8 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
 				onRegenerate={() => regenerateMutation.mutate()}
 				isRegenerating={regenerateMutation.isPending}
 			/>
+
+			<ProjectGoalsCard projectId={projectId} goals={project.goals ?? ''} />
 
 			<ProjectStatsRow
 				commitsThisWeek={project.commits_this_week ?? 0}

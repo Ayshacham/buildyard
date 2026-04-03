@@ -16,6 +16,7 @@ class Project(models.Model):
     )
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
+    goals = models.TextField(blank=True)
     color = models.CharField(max_length=7, default="#185FA5")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="active")
     github_repo = models.CharField(max_length=200, blank=True)

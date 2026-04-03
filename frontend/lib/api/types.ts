@@ -34,6 +34,7 @@ export type FocusSessionApi = {
 	ended_at: string | null;
 	duration_minutes: number | null;
 	planned_duration_minutes: number;
+	overrun_minutes: number;
 	completed: boolean;
 	xp_earned: number;
 };
@@ -60,6 +61,7 @@ export type ProjectListItem = {
 	id: string;
 	name: string;
 	description: string;
+	goals: string;
 	color: string;
 	status: string;
 	github_repo: string;
@@ -115,6 +117,7 @@ export type ProjectDetail = {
 	id: string;
 	name: string;
 	description: string;
+	goals: string;
 	color: string;
 	status: string;
 	github_repo: string;
@@ -135,12 +138,12 @@ export type ProjectDetail = {
 
 export type ProjectTask = {
 	id: string;
-	project: string;
+	project: string | null;
 	parent_task: string | null;
 	title: string;
 	is_micro_task: boolean;
 	estimated_minutes: number | null;
-	status: 'todo' | 'in_progress' | 'done';
+	status: 'todo' | 'in_progress' | 'done' | 'brain_dump';
 	priority: 'low' | 'medium' | 'high';
 	completed_at: string | null;
 	created_at: string;
@@ -155,6 +158,7 @@ export type CreateProjectTaskInput = {
 
 export type PatchProjectTaskInput = Partial<{
 	title: string;
+	project: string | null;
 	priority: ProjectTask['priority'];
 	status: ProjectTask['status'];
 	estimated_minutes: number | null;
@@ -163,4 +167,16 @@ export type PatchProjectTaskInput = Partial<{
 export type UserTaskListItem = ProjectTask & {
 	project_name: string;
 	project_color: string;
+};
+
+export type StandupApi = {
+	id: string;
+	standup_date: string;
+	raw_summary: string;
+	highlights: string[];
+	where_you_are: string[];
+	blockers: string[];
+	suggestions: string[];
+	tokens_used: number;
+	created_at: string;
 };

@@ -9,6 +9,7 @@ from projects.models import Project
 from .models import Standup
 from .serializers import StandupSerializer
 from .services import (
+    brain_dump_tasks,
     generate_standup,
     break_down_task,
     rubber_duck,
@@ -107,3 +108,21 @@ class ContextSummaryView(APIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
         return Response({"last_context": summary})
+
+
+class BrainDumpView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        from tasks.serializers import TaskSerializer
+
+        text = request.data.get("text", "")
+        project_id = request.data.get("project_id")
+        try:
+            tasks, _tokens = brain_dump_tasks(request.user, text, project_id)
+        except ValueError as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            TaskSerializer(tasks, many=True).data,
+            status=status.HTTP_201_CREATED,
+        )

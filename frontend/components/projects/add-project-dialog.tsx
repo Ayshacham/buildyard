@@ -32,6 +32,7 @@ export type ProjectFormValues = {
 	id: string;
 	name: string;
 	description: string;
+	goals: string;
 	color: string;
 	github_repo: string;
 };
@@ -53,6 +54,7 @@ export function AddProjectDialog({
 	const isEdit = Boolean(project);
 	const [name, setName] = React.useState('');
 	const [description, setDescription] = React.useState('');
+	const [goals, setGoals] = React.useState('');
 	const [color, setColor] = React.useState<string>(PRESET_COLORS[0]);
 	const [githubRepo, setGithubRepo] = React.useState('');
 
@@ -64,6 +66,7 @@ export function AddProjectDialog({
 						name: string;
 						color: string;
 						description?: string;
+						goals?: string;
 						github_repo?: string;
 				  }
 				| {
@@ -72,6 +75,7 @@ export function AddProjectDialog({
 						name: string;
 						color: string;
 						description: string;
+						goals: string;
 						github_repo: string;
 				  },
 		) => {
@@ -80,6 +84,7 @@ export function AddProjectDialog({
 					name: payload.name,
 					color: payload.color,
 					description: payload.description,
+					goals: payload.goals,
 					github_repo: payload.github_repo,
 				});
 			}
@@ -87,6 +92,7 @@ export function AddProjectDialog({
 				name: payload.name,
 				color: payload.color,
 				...(payload.description ? { description: payload.description } : {}),
+				...(payload.goals ? { goals: payload.goals } : {}),
 				...(payload.github_repo ? { github_repo: payload.github_repo } : {}),
 			});
 		},
@@ -117,11 +123,13 @@ export function AddProjectDialog({
 			if (project) {
 				setName(project.name);
 				setDescription(project.description ?? '');
+				setGoals(project.goals ?? '');
 				setColor(project.color);
 				setGithubRepo(project.github_repo ?? '');
 			} else {
 				setName('');
 				setDescription('');
+				setGoals('');
 				setColor(PRESET_COLORS[0]);
 				setGithubRepo('');
 			}
@@ -134,6 +142,7 @@ export function AddProjectDialog({
 		const trimmedName = name.trim();
 		if (!trimmedName) return;
 		const desc = description.trim();
+		const goalsText = goals.trim();
 		const repo = githubRepo.trim();
 		if (isEdit && project) {
 			mutate({
@@ -142,6 +151,7 @@ export function AddProjectDialog({
 				name: trimmedName,
 				color,
 				description: desc,
+				goals: goalsText,
 				github_repo: repo,
 			});
 		} else {
@@ -150,6 +160,7 @@ export function AddProjectDialog({
 				name: trimmedName,
 				color,
 				...(desc ? { description: desc } : {}),
+				...(goalsText ? { goals: goalsText } : {}),
 				...(repo ? { github_repo: repo } : {}),
 			});
 		}
@@ -193,6 +204,22 @@ export function AddProjectDialog({
 							value={description}
 							onChange={(ev) => setDescription(ev.target.value)}
 							placeholder="What are you building?"
+							rows={3}
+							disabled={isPending}
+							className="min-h-18 w-full resize-y rounded-lg border border-input bg-transparent px-2.5 py-2 text-base outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 md:text-sm dark:bg-input/30"
+						/>
+					</div>
+					<div className="grid gap-2">
+						<label htmlFor="project-goals" className="text-sm font-medium">
+							Goals &amp; phases{' '}
+							<span className="font-normal text-muted-foreground">(optional)</span>
+						</label>
+						<textarea
+							id="project-goals"
+							name="goals"
+							value={goals}
+							onChange={(ev) => setGoals(ev.target.value)}
+							placeholder="e.g. Phase 1: landing page, Phase 2: menu, Phase 3: ordering system."
 							rows={3}
 							disabled={isPending}
 							className="min-h-18 w-full resize-y rounded-lg border border-input bg-transparent px-2.5 py-2 text-base outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 md:text-sm dark:bg-input/30"

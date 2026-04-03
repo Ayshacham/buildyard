@@ -54,6 +54,7 @@ class Standup(models.Model):
     standup_date = models.DateField()
     raw_summary = models.TextField()
     highlights = models.JSONField(default=list)
+    where_you_are = models.JSONField(default=list)
     blockers = models.JSONField(default=list)
     suggestions = models.JSONField(default=list)
     tokens_used = models.IntegerField(default=0)
